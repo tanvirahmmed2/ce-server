@@ -1,5 +1,9 @@
 const express = require('express')
 const cors = require('cors')
+const userRouter = require('./router/user.router')
+
+
+const app = express()
 
 
 
@@ -12,10 +16,13 @@ app.use(cors({
 
 
 
-const app = express()
 
 
+app.get('/api', (req,res)=>{
+    res.status(200).send('CCIRL server is running')
+})
 
+app.use('/api/user', userRouter)
 
 
 
