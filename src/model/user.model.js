@@ -73,7 +73,7 @@ const userSchema = new mongoose.Schema({
             link: { type: String, trim: true }
         }
     ],
-    accountCreatedAt: {
+    createdAt: {
         type: Date,
         default: Date.now
     }
