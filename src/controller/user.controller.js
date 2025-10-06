@@ -93,12 +93,8 @@ const loginUser = async (req, res) => {
             maxAge: 1000 * 60 * 60 // 1 hour
         };
 
-        let cookieName = "";
-        if (user.role === "admin") cookieName = "admin_token";
-        else if (user.role === "author") cookieName = "author_token";
-        else if (user.role === "member") cookieName = "member_token";
-
-        res.cookie(cookieName, token, cookieOptions);
+        
+        res.cookie('user_token', token, cookieOptions);
 
         return res.status(200).json({
             success: true,
@@ -145,10 +141,36 @@ const logoutUser = async (req, res) => {
 }
 
 
+const protectedAdmin=async(req,res)=>{
+    try {
+        const token= req.cookies.admin_token
+        if(!token){
+            return res.status(400).send({
+                success: false,
+                message: 'admin Token not found',
+
+            })
+        }
+        req.status(200).send({
+            success: true,
+            message: 'Succesfully authenticated admin'
+        })
+    } catch (error) {
+        req.status(500).send({
+            success: false,
+            message: "admin route couldn't br protected" + error
+        })
+        
+    }
+}
+
+
+
 module.exports = {
     resgisterUser,
     loginUser,
     logoutUser,
-    getUsers
+    getUsers,
+    protectedAdmin
 
 }
