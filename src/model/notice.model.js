@@ -10,6 +10,10 @@ const noticeSchema = new mongoose.Schema({
     type: String,
     required: [true, 'PDF URL is required']
   },
+  pdf_id: {
+    type: String,
+    required: [true, 'PDF URL is required']
+  },
   createdAt: {
     type: Date,
     default: Date.now
