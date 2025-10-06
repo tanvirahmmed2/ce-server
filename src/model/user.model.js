@@ -44,7 +44,10 @@ const userSchema = new mongoose.Schema({
         trim: true,
         match: [/.+\@.+\..+/, 'Please enter a valid email address']
     },
-
+    isBanned:{
+        type:Boolean,
+        default: false
+    },
     phone: {
         type: String,
         required: [true, 'Phone number is required'],

@@ -13,7 +13,7 @@ const getUsers = async (req, res) => {
             })
         }
         res.status(200).send({
-            success: false,
+            success: true,
             message: "Successfully found users",
             payload: users
         })

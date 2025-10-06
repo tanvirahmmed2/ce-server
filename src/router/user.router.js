@@ -13,7 +13,7 @@ userRouter.get('/', (req, res) => {
 userRouter.post('/register', resgisterUser)
 userRouter.post('/login', loginUser)
 userRouter.post('/logout', logoutUser)
-userRouter.get('/getusers', isLogin, getUsers)
+userRouter.get('/getusers',  getUsers)
 
 
 
