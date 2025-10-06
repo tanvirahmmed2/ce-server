@@ -9,7 +9,7 @@ const API_SECRET= process.env.CLOUDINAY_API_SECRET
 const cloudinary = cloudinary.config({
     cloud_name: CLOUD_NAME,
     api_key: API_KEY,
-    api_secret: API_SECRET // Click 'View API Keys' above to copy your API secret
+    api_secret: API_SECRET 
 });
 
 

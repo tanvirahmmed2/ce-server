@@ -11,12 +11,12 @@ const userSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Date of Birth is required']
     },
-    image: {
+    profileImage: {
         type: String,
         default: null, // no image by default
         trim: true
     },
-    image_id: {
+    profileImage_id: {
         type: String,
         trim: true
     },
