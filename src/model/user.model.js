@@ -11,16 +11,22 @@ const userSchema = new mongoose.Schema({
         type: Date,
         required: [true, 'Date of Birth is required']
     },
-
+    image: {
+        type: String,
+        default: null, // no image by default
+        trim: true
+    },
+    image_id: {
+        type: String,
+        trim: true
+    },
     gender: {
         type: String,
         enum: ['male', 'female'],
         required: [true, 'Gender is required']
     },
-
     bloodGroup: {
         type: String,
-        enum: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
         required: [true, 'Blood Group is required']
     },
 
@@ -59,12 +65,12 @@ const userSchema = new mongoose.Schema({
     },
     education: [
         {
-            degree: { type: String, trim: true },      
-            field: { type: String, trim: true },       
-            institution: { type: String, trim: true }, 
+            degree: { type: String, trim: true },
+            field: { type: String, trim: true },
+            institution: { type: String, trim: true },
             startYear: { type: Number },
             endYear: { type: Number },
-            grade: { type: String, trim: true }        
+            grade: { type: String, trim: true }
         }
     ],
     publications: [
