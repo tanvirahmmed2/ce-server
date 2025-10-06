@@ -38,24 +38,20 @@ const isLogin = (req, res, next) => {
 
 const isAdmin = (req, res, next) => {
     try {
-        const token = req.cookies.admin_token
-        if (!token) {
+        const user = req.user
+        if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "You are not an admin or token not found"
+                message: "user token not found"
             });
         }
 
 
-        let decoded;
-        try {
-            decoded = jwt.verify(token, process.env.JWT_SECRET);
-        } catch (err) {
-            return res.status(403).json({
+        if (user.role !== 'admin') {
+            return res.status(401).send({
                 success: false,
-                message: "JWT verification failed",
-                error: err.message
-            });
+                message: "You're not an admin"
+            })
         }
 
         req.user = decoded;
@@ -64,7 +60,7 @@ const isAdmin = (req, res, next) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: "Server error, please login",
+            message: "Admin authentication failed",
             error: error.message
         });
     }
@@ -74,24 +70,20 @@ const isAdmin = (req, res, next) => {
 
 const isAuthor = (req, res, next) => {
     try {
-        const token = req.cookies.author_token
-        if (!token) {
+        const user = req.user
+        if (!user) {
             return res.status(401).json({
                 success: false,
-                message: "You are not an author or token not found"
+                message: "user token not found"
             });
         }
 
 
-        let decoded;
-        try {
-            decoded = jwt.verify(token, process.env.JWT_SECRET);
-        } catch (err) {
-            return res.status(403).json({
+        if (user.role !== 'author') {
+            return res.status(401).send({
                 success: false,
-                message: "JWT verification failed",
-                error: err.message
-            });
+                message: "You're not an author"
+            })
         }
 
         req.user = decoded;
@@ -100,7 +92,7 @@ const isAuthor = (req, res, next) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: "Server error, please login",
+            message: "Author authentication failed",
             error: error.message
         });
     }

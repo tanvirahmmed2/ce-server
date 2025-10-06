@@ -1,6 +1,6 @@
 const express = require('express')
 const { resgisterUser, loginUser, logoutUser, getUsers, protectedAdmin } = require('../controller/user.controller')
-const { isLogin, isAdmin } = require('../middleware/authenticator')
+const {  isAdmin } = require('../middleware/authenticator')
 const userRouter = express.Router()
 
 
