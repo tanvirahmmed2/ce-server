@@ -3,7 +3,7 @@ const jwt = require('jsonwebtoken');
 
 const isLogin = (req, res, next) => {
     try {
-        const token = req.cookies.admin_token || req.cookies.author_token || req.cookies.member_token;
+        const token = req.cookies.user_token;
         if (!token) {
             return res.status(401).json({
                 success: false,

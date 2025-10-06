@@ -63,8 +63,8 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ['member', 'author', 'admin'],
-        default: 'member'
+        enum: ['user', 'admin'],
+        default: 'user'
     },
     education: [
         {
@@ -94,7 +94,7 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    }
+    } 
 });
 
 const User = mongoose.model('User', userSchema);
