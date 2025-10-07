@@ -84,28 +84,54 @@ const addNotice = async (req, res) => {
 
 const removeNotice = async (req, res) => {
     try {
-        const {id}= req.body
-        if(!id){
-            return res.status(404).send({
+        const { id } = req.body;
+
+        // 1️⃣ Validate ID
+        if (!id) {
+            return res.status(400).send({
                 success: false,
-                message: "notice id not found"
+                message: "Notice ID is required",
             });
         }
-        await Notice.findOneAndDelete({_id:id})
-        res.status(200).send({
+
+        // 2️⃣ Check if notice exists
+        const notice = await Notice.findById(id);
+        if (!notice) {
+            return res.status(404).send({
+                success: false,
+                message: "Notice not found",
+            });
+        }
+
+        // 3️⃣ Delete PDF from Cloudinary (only if it exists)
+        if (notice.pdf_id) {
+            try {
+                await cloudinary.uploader.destroy(notice.pdf_id);
+            } catch (cloudError) {
+                console.log("Cloudinary delete failed:", cloudError.message);
+                // optional: continue even if pdf deletion fails
+            }
+        }
+
+        // 4️⃣ Delete notice from MongoDB
+        await Notice.findByIdAndDelete(id);
+
+        // 5️⃣ Send response
+        return res.status(200).send({
             success: true,
             message: "Notice deleted successfully",
         });
 
     } catch (error) {
-        console.error("Error deleting notices:", error);
+        console.error("Error deleting notice:", error);
         res.status(500).send({
             success: false,
             message: "Failed to delete notice",
-            error: error.message
-        })
+            error: error.message,
+        });
     }
-}
+};
+
 
 module.exports = {
     getNotices,
