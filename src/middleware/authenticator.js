@@ -29,7 +29,7 @@ const isLogin = (req, res, next) => {
     } catch (error) {
         res.status(500).json({
             success: false,
-            message: "Server error, please login",
+            message: "Is login failed, please login",
             error: error.message
         });
     }
@@ -37,66 +37,59 @@ const isLogin = (req, res, next) => {
 
 
 const isAdmin = (req, res, next) => {
-    try {
-        const user = req.user
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "user token not found"
-            });
-        }
-
-
-        if (user.role !== 'admin') {
-            return res.status(401).send({
-                success: false,
-                message: "You're not an admin"
-            })
-        }
-
-        req.user = decoded;
-        next();
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Admin authentication failed",
-            error: error.message
-        });
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User token not found"
+      });
     }
+
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        message: "You're not an admin"
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Admin authentication failed",
+      error: error.message
+    });
+  }
 };
-
-
 
 const isAuthor = (req, res, next) => {
-    try {
-        const user = req.user
-        if (!user) {
-            return res.status(401).json({
-                success: false,
-                message: "user token not found"
-            });
-        }
-
-
-        if (user.role !== 'author') {
-            return res.status(401).send({
-                success: false,
-                message: "You're not an author"
-            })
-        }
-
-        req.user = decoded;
-        next();
-
-    } catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Author authentication failed",
-            error: error.message
-        });
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({
+        success: false,
+        message: "User token not found"
+      });
     }
+
+    if (user.role !== 'author') {
+      return res.status(403).json({
+        success: false,
+        message: "You're not an author"
+      });
+    }
+
+    next();
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Author authentication failed",
+      error: error.message
+    });
+  }
 };
+
 
 module.exports = {
     isLogin, isAdmin, isAuthor

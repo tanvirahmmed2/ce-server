@@ -1,5 +1,7 @@
 const express = require('express')
 const cors = require('cors')
+
+const cookieParser = require('cookie-parser');
 const userRouter = require('./router/user.router')
 const messageRouter = require('./router/message.router')
 const eventRouter = require('./router/event.router')
@@ -14,6 +16,7 @@ const app = express()
 
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+app.use(cookieParser())
 app.use(cors({
     origin: 'http://localhost:3000',
     credentials: true

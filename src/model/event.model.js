@@ -16,6 +16,11 @@ const eventSchema = new mongoose.Schema({
     required: [true, 'Location is required'],
     trim: true,
   },
+  registration: {
+    type: String,
+    required: [true, 'Registration link is required'],
+    trim: true,
+  },
   day: {
     type: Number,
     required: [true, 'Day is required'],

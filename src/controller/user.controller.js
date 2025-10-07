@@ -66,46 +66,54 @@ const resgisterUser = async (req, res) => {
 
 
 const loginUser = async (req, res) => {
-    try {
-        const { email, password } = req.body;
-        if (!email || !password) {
-            return res.status(400).json({ success: false, message: "All fields are required" });
-        }
+  try {
+    const { email, password } = req.body;
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        const passwordMatch = await bcrypt.compare(password, user.password);
-        if (!passwordMatch) {
-            return res.status(400).json({ success: false, message: "Incorrect password" });
-        }
-
-        const payload = { id: user._id, role: user.role };
-
-        const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
-
-        const cookieOptions = {
-            httpOnly: true,
-            secure: false, // true in production with HTTPS
-            sameSite: "lax",
-            maxAge: 1000 * 60 * 60 // 1 hour
-        };
-
-        
-        res.cookie('user_token', token, cookieOptions);
-
-        return res.status(200).json({
-            success: true,
-            message: "Login successful",
-            user: { id: user._id, role: user.role, email: user.email }
-        });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server error", error: error.message });
+    if (!email || !password) {
+      return res.status(400).json({ success: false, message: "All fields are required" });
     }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.password);
+    if (!passwordMatch) {
+      return res.status(400).json({ success: false, message: "Incorrect password" });
+    }
+
+    // ✅ Use minimal payload
+    const payload = { id: user._id, role: user.role, email: user.email };
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+
+    const cookieOptions = {
+      httpOnly: true,
+      secure: false, // set to true in production with HTTPS
+      sameSite: "lax",
+      maxAge: 1000 * 60 * 60, // 1 hour
+    };
+
+    res.cookie("user_token", token, cookieOptions);
+
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: {
+        id: user._id,
+        name: user.name,
+        role: user.role,
+        email: user.email,
+      },
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Server error",
+      error: error.message,
+    });
+  }
 };
 
 
@@ -117,19 +125,6 @@ const logoutUser = async (req, res) => {
             sameSite: "strict",
             path: "/",
         })
-        res.clearCookie("admin_token", {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            path: "/",
-        })
-        res.clearCookie("author_token", {
-            httpOnly: true,
-            secure: true,
-            sameSite: "strict",
-            path: "/",
-        })
-
         return res.status(200).json({
             success: true,
             message: "Successfully logged out"
@@ -140,29 +135,22 @@ const logoutUser = async (req, res) => {
     }
 }
 
+const protectedRoute = async (req, res) => {
+  try {
+    const token = req.cookies.user_token;
+    if (!token) return res.status(401).json({ success: false, message: 'Not logged in' });
 
-const protectedAdmin=async(req,res)=>{
-    try {
-        const token= req.cookies.admin_token
-        if(!token){
-            return res.status(400).send({
-                success: false,
-                message: 'admin Token not found',
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id).select('-password'); // exclude password
 
-            })
-        }
-        req.status(200).send({
-            success: true,
-            message: 'Succesfully authenticated admin'
-        })
-    } catch (error) {
-        req.status(500).send({
-            success: false,
-            message: "admin route couldn't br protected" + error
-        })
-        
-    }
-}
+    res.status(200).json({
+      success: true,
+      user,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+  }
+};
 
 
 
@@ -171,6 +159,6 @@ module.exports = {
     loginUser,
     logoutUser,
     getUsers,
-    protectedAdmin
+    protectedRoute
 
 }
