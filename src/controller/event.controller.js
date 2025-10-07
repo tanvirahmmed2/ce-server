@@ -52,7 +52,30 @@ const addEvent = async (req, res) => {
     }
 }
 
-const deleteEvent=async(req,res)=>{}
+const deleteEvent=async(req,res)=>{
+    try {
+        const {id}= req.body
+        if(!id){
+            return res.status(404).send({
+                success: false,
+                message: "event id not found"
+            });
+        }
+        await Event.findOneAndDelete({_id:id})
+        res.status(200).send({
+            success: true,
+            message: "Notice deleted successfully",
+        });
+
+    } catch (error) {
+        console.error("Error deleting notices:", error);
+        res.status(500).send({
+            success: false,
+            message: "Failed to delete event",
+            error: error.message
+        })
+    }
+}
 
 module.exports = {
     getEvents,

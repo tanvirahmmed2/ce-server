@@ -9,7 +9,7 @@ const eventRouter= express.Router()
 
 eventRouter.get('/', getEvents)
 eventRouter.post('/add',isLogin, isAdmin, addEvent)
-eventRouter.delete('/add',isLogin, isAdmin, deleteEvent)
+eventRouter.delete('/delete',isLogin, isAdmin, deleteEvent)
 
 
 
