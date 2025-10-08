@@ -64,7 +64,7 @@ const deleteEvent=async(req,res)=>{
         await Event.findOneAndDelete({_id:id})
         res.status(200).send({
             success: true,
-            message: "Notice deleted successfully",
+            message: "Event deleted successfully",
         });
 
     } catch (error) {

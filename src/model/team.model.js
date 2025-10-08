@@ -16,6 +16,10 @@ const teamSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    profileLink: {
+        type: String,
+        required: true,
+    },
     profileImage: {
         type: String,
         required: true,
@@ -32,6 +36,6 @@ const teamSchema = new mongoose.Schema({
 })
 
 
-const Team= mongoose.model('team', teamSchema)
+const Team = mongoose.model('team', teamSchema)
 
-module.exports= Team
+module.exports = Team
