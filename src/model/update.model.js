@@ -14,6 +14,10 @@ const updateScehma= new mongoose.Schema({
         type: String,
         required: [true, 'Image is required'],
     },
+    image_id:{
+        type: String,
+        required: [true, 'Image is required'],
+    },
     createdAt:{
         type: Date,
         default: Date.now
