@@ -7,7 +7,8 @@ const messageRouter = require('./router/message.router')
 const eventRouter = require('./router/event.router')
 const libraryRouter = require('./router/library.router')
 const noticeRouter = require('./router/notice.router')
-const updateRouter = require('./router/update.router')
+const updateRouter = require('./router/update.router');
+const teamRouter = require('./router/team.router');
 
 
 const app = express()
@@ -37,6 +38,7 @@ app.use('/api/event', eventRouter)
 app.use('/api/library', libraryRouter)
 app.use('/api/notice', noticeRouter)
 app.use('/api/update', updateRouter)
+app.use('/api/team', teamRouter)
 
 
 
