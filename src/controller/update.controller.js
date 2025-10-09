@@ -47,6 +47,11 @@ const addUpdate = async (req, res) => {
         const newUpdate = new Update({
             title, description, image: uploadedImage.secure_url, image_id: uploadedImage.public_id
         })
+        await newUpdate.save()
+         res.status(200).send({
+            success: true,
+            message: 'Successfully added update'
+        })
 
     } catch (error) {
         res.status(500).send({
