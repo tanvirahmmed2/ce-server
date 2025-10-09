@@ -30,8 +30,11 @@ const addUpdate= async(req,res)=>{
 
 }
 
+const removeUpdate=async(req,res)=>{
 
+}
 module.exports = {
     getUpdate,
-    addUpdate
+    addUpdate,
+    removeUpdate
 }
