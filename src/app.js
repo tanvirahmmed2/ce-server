@@ -10,6 +10,7 @@ const noticeRouter = require('./router/notice.router')
 const updateRouter = require('./router/update.router');
 const teamRouter = require('./router/team.router');
 const projectRouter = require('./router/project.router');
+const galleryRouter = require('./router/gallery.router');
 
 
 const app = express()
@@ -41,6 +42,7 @@ app.use('/api/notice', noticeRouter)
 app.use('/api/update', updateRouter)
 app.use('/api/team', teamRouter)
 app.use('/api/project', projectRouter)
+app.use('/api/gallery', galleryRouter)
 
 
 
