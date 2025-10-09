@@ -29,8 +29,8 @@ const getImages = async (req, res) => {
 
 const addImage = async (req, res) => {
     try {
-        const { title, description } = req.body
-        if (!title || !description) {
+        const { title, author } = req.body
+        if (!title || !author) {
             return res.status(400).send({
                 success: false,
                 message: 'All fields are required',
@@ -45,7 +45,7 @@ const addImage = async (req, res) => {
         const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
         const uploadedImage = await cloudinary.uploader.upload(fileStr, { folder: 'gallery' })
         const newImage = new Gallery({
-            title, description, image: uploadedImage.secure_url, image_id: uploadedImage.public_id
+            title, author, image: uploadedImage.secure_url, image_id: uploadedImage.public_id
         })
         await newImage.save()
          res.status(200).send({
