@@ -9,6 +9,7 @@ const libraryRouter = require('./router/library.router')
 const noticeRouter = require('./router/notice.router')
 const updateRouter = require('./router/update.router');
 const teamRouter = require('./router/team.router');
+const projectRouter = require('./router/project.router');
 
 
 const app = express()
@@ -39,6 +40,7 @@ app.use('/api/library', libraryRouter)
 app.use('/api/notice', noticeRouter)
 app.use('/api/update', updateRouter)
 app.use('/api/team', teamRouter)
+app.use('/api/project', projectRouter)
 
 
 
