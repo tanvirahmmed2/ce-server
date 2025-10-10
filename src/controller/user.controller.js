@@ -1,7 +1,8 @@
 require('dotenv').config()
 const User = require("../model/user.model");
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken');
+const { sendMail } = require('../config/transporter');
 
 const getUsers = async (req, res) => {
   try {
@@ -50,6 +51,17 @@ const resgisterUser = async (req, res) => {
       name, dateOfBirth, gender, country, bloodGroup, phone, email, password: hashedPassword
     })
     await newUser.save()
+
+    const emaildata = {
+      email,
+      subject: `${name} , Welcome to CCIRL`,
+      html: `
+       <p>We’re thrilled to have you with us. At CCIRL, we believe in collaboration, innovation, and growth. Together, we can achieve great things and make a lasting impact.</p>
+       <h1>Have a great journey!</h1>
+      `
+    }
+    sendMail(emaildata)
+
 
     return res.status(200).send({
       success: false,
@@ -232,11 +244,50 @@ const updateBan = async (req, res) => {
 
 const forgetPassword = async (req, res) => {
   try {
-    const { email } = req.body
-    if (!email) {
+    const { email } = req.body;
+    if (!email) return res.status(400).send({ success: false, message: 'Please enter email address' });
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(400).send({ success: false, message: 'No user found with this email. Please sign up' });
+
+    const forgetcode = Math.floor(100000 + Math.random() * 900000).toString(); // Save as string
+    const codeExpireDate = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    user.passwordResetToken = forgetcode;
+    user.passwordResetExpires = codeExpireDate;
+
+    await user.save(); 
+
+    const emaildata = {
+      email,
+      subject: 'Password reset code',
+      html: `
+        <h2>Hello ${user.name}</h2>
+        <p>Please use this code for your account recovery:</p>
+        <h1>${forgetcode}</h1>
+      `
+    };
+
+    sendMail(emaildata);
+
+    res.status(200).send({ success: true, message: 'Please check your mail' });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({ success: false, message: 'Failed to reset password' });
+  }
+};
+
+
+
+
+const resetPassword = async (req, res) => {
+  try {
+    const { email, code, newpassword } = req.body
+    if (!email || !code || !newpassword) {
       return res.status(400).send({
         success: false,
-        message: 'Please enter email address'
+        message: 'All fields are required'
       })
     }
     const user = await User.findOne({ email: email })
@@ -246,21 +297,40 @@ const forgetPassword = async (req, res) => {
         message: 'No user found with this email. Please sign up'
       })
     }
+    if (user.passwordResetToken !== code.trim()) {
+      return res.status(400).send({
+        success: false,
+        message: 'Wrong code. Please check your mail or try again'
+      })
+    }
 
+    if (user.passwordResetExpires < Date.now()) {
+      return res.status(400).send({
+        success: false,
+        message: 'code expired. Please send code again'
+      })
+    }
 
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newpassword, salt);
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
 
+    user.password = hashedPassword
 
+    await user.save()
 
     res.status(200).send({
-      succcess: true,
-      message: 'Please check your mail'
+      success: true,
+      message: 'Password changed successfully please login now'
     })
+
+
   } catch (error) {
     res.status(500).send({
       success: false,
-      message: 'Failed to reset password'
+      message: 'Failed to change password'
     })
-
   }
 }
 
@@ -296,6 +366,7 @@ module.exports = {
   updateRole,
   updateBan,
   forgetPassword,
+  resetPassword,
   protectedRoute
 
 }
