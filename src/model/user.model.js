@@ -79,7 +79,9 @@ const userSchema = new mongoose.Schema({
     publications: [
         {
             title: { type: String, trim: true },
-            link: { type: String, trim: true }
+            link: { type: String, trim: true },
+            description: { type: String, trim: true },
+
         }
     ],
     passwordResetToken: {
