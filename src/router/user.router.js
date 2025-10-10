@@ -1,6 +1,6 @@
 const express = require('express')
-const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute,  } = require('../controller/user.controller')
-const {   isLogin } = require('../middleware/authenticator')
+const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan,  } = require('../controller/user.controller')
+const {   isLogin, isAdmin } = require('../middleware/authenticator')
 const userRouter = express.Router()
 
 
@@ -10,10 +10,13 @@ userRouter.get('/', (req, res) => {
 })
 
 
+userRouter.get('/users',  getUsers)
 userRouter.post('/register', resgisterUser)
 userRouter.post('/login', loginUser)
 userRouter.post('/logout',isLogin, logoutUser)
-userRouter.get('/getusers',  getUsers)
+
+userRouter.put('/updaterole',isLogin, isAdmin, updateRole)
+userRouter.put('/updateban', updateBan)
 
 
 userRouter.get('/protectedroute', isLogin, protectedRoute )
