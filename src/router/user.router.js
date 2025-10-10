@@ -1,5 +1,5 @@
 const express = require('express')
-const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword,  } = require('../controller/user.controller')
+const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser,  } = require('../controller/user.controller')
 const {   isLogin, isAdmin } = require('../middleware/authenticator')
 const userRouter = express.Router()
 
@@ -16,6 +16,7 @@ userRouter.post('/login', loginUser)
 userRouter.post('/logout',isLogin, logoutUser)
 userRouter.post('/forget', forgetPassword)
 userRouter.post('/reset', resetPassword)
+userRouter.delete('/delete',isLogin, deleteUser)
 
 userRouter.put('/updaterole',isLogin, isAdmin, updateRole)
 userRouter.put('/updateban', updateBan)

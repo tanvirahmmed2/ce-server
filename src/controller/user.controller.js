@@ -256,7 +256,7 @@ const forgetPassword = async (req, res) => {
     user.passwordResetToken = forgetcode;
     user.passwordResetExpires = codeExpireDate;
 
-    await user.save(); 
+    await user.save();
 
     const emaildata = {
       email,
@@ -335,6 +335,40 @@ const resetPassword = async (req, res) => {
 }
 
 
+const deleteUser = async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) {
+      return res.status(400).send({
+        succcess: false,
+        message: 'Email is required'
+      })
+    }
+    const user = await User.findOne({ email: email })
+    if (!user) {
+      return res.status(400).send({
+        succcess: false,
+        message: 'No user found with this email'
+      })
+    }
+    if (user.role === 'admin') {
+      return res.status(400).send({
+        succcess: false,
+        message: 'Admin profile can not be deleted'
+      })
+    }
+    await User.findOneAndDelete({ email: email })
+    res.status(200).send({
+      succcess: true,
+      message: 'Succefully deleted profile'
+    })
+  } catch (error) {
+    res.status(500).send({
+      succcess: false,
+      message: 'Profile delete process failed'
+    })
+  }
+}
 
 
 
@@ -367,6 +401,7 @@ module.exports = {
   updateBan,
   forgetPassword,
   resetPassword,
+  deleteUser,
   protectedRoute
 
 }
