@@ -89,13 +89,13 @@ const loginUser = async (req, res) => {
     
     const payload = { id: user._id, role: user.role, email: user.email };
 
-    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     const cookieOptions = {
       httpOnly: true,
-      secure: false, // set to true in production with HTTPS
+      secure: false, 
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60, // 1 hour
+      maxAge: 1000 * 60 * 60* 24, // 1 hour
     };
 
     res.cookie("user_token", token, cookieOptions);
