@@ -1,7 +1,7 @@
 require('dotenv').config()
 const User = require("../model/user.model");
 const bcrypt = require('bcryptjs')
-const jwt =require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 const getUsers = async (req, res) => {
   try {
@@ -83,19 +83,19 @@ const loginUser = async (req, res) => {
     if (!passwordMatch) {
       return res.status(400).send({ success: false, message: "Incorrect password" });
     }
-    if(user.isBanned){
+    if (user.isBanned) {
       return res.status(400).send({ success: false, message: " User is banned" });
     }
-    
+
     const payload = { id: user._id, role: user.role, email: user.email };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     const cookieOptions = {
       httpOnly: true,
-      secure: false, 
+      secure: false,
       sameSite: "lax",
-      maxAge: 1000 * 60 * 60* 24, // 1 hour
+      maxAge: 1000 * 60 * 60 * 24, // 1 hour
     };
 
     res.cookie("user_token", token, cookieOptions);
@@ -230,7 +230,39 @@ const updateBan = async (req, res) => {
   }
 };
 
+const forgetPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) {
+      return res.status(400).send({
+        success: false,
+        message: 'Please enter email address'
+      })
+    }
+    const user = await User.findOne({ email: email })
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: 'No user found with this email. Please sign up'
+      })
+    }
 
+
+
+
+
+    res.status(200).send({
+      succcess: true,
+      message: 'Please check your mail'
+    })
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: 'Failed to reset password'
+    })
+
+  }
+}
 
 
 
@@ -263,6 +295,7 @@ module.exports = {
   getUsers,
   updateRole,
   updateBan,
+  forgetPassword,
   protectedRoute
 
 }
