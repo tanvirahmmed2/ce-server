@@ -1,7 +1,7 @@
 require('dotenv').config()
 const User = require("../model/user.model");
 const bcrypt = require('bcryptjs')
-const jwt = require('jsonwebtoken')
+const jwt =require('jsonwebtoken')
 
 const getUsers = async (req, res) => {
   try {
@@ -71,20 +71,22 @@ const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ success: false, message: "All fields are required" });
+      return res.status(400).send({ success: false, message: "All fields are required" });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+      return res.status(404).send({ success: false, message: "User not found" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
-      return res.status(400).json({ success: false, message: "Incorrect password" });
+      return res.status(400).send({ success: false, message: "Incorrect password" });
     }
-
-    // ✅ Use minimal payload
+    if(user.isBanned){
+      return res.status(400).send({ success: false, message: " User is banned" });
+    }
+    
     const payload = { id: user._id, role: user.role, email: user.email };
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1h" });
@@ -98,7 +100,7 @@ const loginUser = async (req, res) => {
 
     res.cookie("user_token", token, cookieOptions);
 
-    res.status(200).json({
+    res.status(200).send({
       success: true,
       message: "Login successful",
       user: {
@@ -109,7 +111,7 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({
+    res.status(500).send({
       success: false,
       message: "Server error",
       error: error.message,
@@ -126,13 +128,13 @@ const logoutUser = async (req, res) => {
       sameSite: "strict",
       path: "/",
     })
-    return res.status(200).json({
+    return res.status(200).send({
       success: true,
       message: "Successfully logged out"
     })
   } catch (error) {
     console.error(error);
-    res.status(500).json({ success: false, message: "Server error", error: error.message });
+    res.status(500).send({ success: false, message: "Server error", error: error.message });
   }
 }
 
@@ -238,17 +240,17 @@ const updateBan = async (req, res) => {
 const protectedRoute = async (req, res) => {
   try {
     const token = req.cookies.user_token;
-    if (!token) return res.status(401).json({ success: false, message: 'Not logged in' });
+    if (!token) return res.status(401).send({ success: false, message: 'Not logged in' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.id).select('-password'); // exclude password
 
-    res.status(200).json({
+    res.status(200).send({
       success: true,
       user,
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Server error', error: error.message });
+    res.status(500).send({ success: false, message: 'Server error', error: error.message });
   }
 };
 
