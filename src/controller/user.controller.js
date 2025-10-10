@@ -38,7 +38,7 @@ const resgisterUser = async (req, res) => {
         if (existUser) {
             return res.status(400).send({
                 success: false,
-                message: 'User already exists'
+                message: 'User already exists with this email'
             });
         }
 
