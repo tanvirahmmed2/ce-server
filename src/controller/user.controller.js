@@ -372,6 +372,103 @@ const deleteUser = async (req, res) => {
 
 
 
+const addPublication = async (req, res) => {
+  try {
+    const { title, link, description, authorId } = req.body;
+
+    
+    if (!title || !link || !description || !authorId) {
+      return res.status(400).send({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    const user = await User.findById(authorId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: 'Author not found'
+      });
+    }
+
+    if (user.role !== 'author') {
+      return res.status(400).send({
+        success: false,
+        message: 'User is not an author'
+      });
+    }
+
+  
+    user.publications.push({ title, link, description });
+
+    
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: 'Successfully submitted publication'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Failed to submit publication',
+      error: error.message
+    });
+  }
+};
+
+
+const removePublication = async (req, res) => {
+  try {
+    const { title, link, description, authorId } = req.body;
+
+    
+    if (!title || !link || !description || !authorId) {
+      return res.status(400).send({
+        success: false,
+        message: 'All fields are required'
+      });
+    }
+
+    const user = await User.findById(authorId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: 'Author not found'
+      });
+    }
+
+    if (user.role !== 'author') {
+      return res.status(400).send({
+        success: false,
+        message: 'User is not an author'
+      });
+    }
+
+  
+    user.publications.push({ title, link, description });
+
+    
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: 'Successfully submitted publication'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Failed to submit publication',
+      error: error.message
+    });
+  }
+};
+
 
 const protectedRoute = async (req, res) => {
   try {
@@ -402,6 +499,8 @@ module.exports = {
   forgetPassword,
   resetPassword,
   deleteUser,
-  protectedRoute
+  protectedRoute,
+  addPublication,
+  removePublication
 
 }

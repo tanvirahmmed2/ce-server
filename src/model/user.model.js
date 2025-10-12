@@ -81,6 +81,7 @@ const userSchema = new mongoose.Schema({
             title: { type: String, trim: true },
             link: { type: String, trim: true },
             description: { type: String, trim: true },
+            createdAt: { type: Date, default: Date.now }
 
         }
     ],

@@ -1,5 +1,5 @@
 const express = require('express')
-const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser,  } = require('../controller/user.controller')
+const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser, addPublication, removePublication,  } = require('../controller/user.controller')
 const {   isLogin, isAdmin } = require('../middleware/authenticator')
 const userRouter = express.Router()
 
@@ -25,5 +25,8 @@ userRouter.put('/updateban', updateBan)
 userRouter.get('/protectedroute', isLogin, protectedRoute )
 
 
+
+userRouter.put('/addpublication', addPublication)
+userRouter.put('/removepubliaction', removePublication)
 
 module.exports = userRouter

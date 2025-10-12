@@ -1,6 +1,5 @@
 const cloudinary = require("../config/cloudinary");
 const Notice = require("../model/notice.model");
-const streamifier = require("streamifier");
 
 const getNotices = async (req, res) => {
     try {
