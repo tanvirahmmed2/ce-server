@@ -400,7 +400,7 @@ const addPublication = async (req, res) => {
     }
 
   
-    user.publications.push({ title, link, description });
+    user.publications.push({ title, link, description, authorId });
 
     
     await user.save();
@@ -421,15 +421,14 @@ const addPublication = async (req, res) => {
 };
 
 
-const removePublication = async (req, res) => {
+const removepubliaction = async (req, res) => {
   try {
-    const { title, link, description, authorId } = req.body;
+    const { authorId, pubId } = req.body;
 
-    
-    if (!title || !link || !description || !authorId) {
+    if (!authorId || !pubId) {
       return res.status(400).send({
         success: false,
-        message: 'All fields are required'
+        message: "Author ID and publication ID are required",
       });
     }
 
@@ -437,37 +436,69 @@ const removePublication = async (req, res) => {
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: 'Author not found'
+        message: "Author not found",
       });
     }
 
-    if (user.role !== 'author') {
-      return res.status(400).send({
-        success: false,
-        message: 'User is not an author'
-      });
-    }
-
-  
-    user.publications.push({ title, link, description });
-
-    
-    await user.save();
+   
+    const updated = await User.findByIdAndUpdate(
+      authorId,
+      { $pull: { publications: { _id: pubId } } },
+      { new: true }
+    );
 
     res.status(200).send({
       success: true,
-      message: 'Successfully submitted publication'
+      message: "Publication deleted successfully",
+      publications: updated.publications,
     });
 
   } catch (error) {
     console.error(error);
     res.status(500).send({
       success: false,
-      message: 'Failed to submit publication',
-      error: error.message
+      message: "Failed to delete publication",
+      error: error.message,
     });
   }
 };
+
+
+
+const getPublications = async (req, res) => {
+  try {
+    const users = await User.find({}).select("-password");
+
+    if (!users || users.length === 0) {
+      return res.status(400).send({
+        success: false,
+        message: 'No user found'
+      });
+    }
+
+    const publications = users.flatMap(user => user.publications || []);
+
+    if (publications.length === 0) {
+      return res.status(404).send({
+        success: false,
+        message: 'No publications found'
+      });
+    }
+
+    res.status(200).send({
+      success: true,
+      message: 'Successfully fetched all publications',
+      payload: publications
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Failed to fetch publications'
+    });
+  }
+};
+
 
 
 const protectedRoute = async (req, res) => {
@@ -501,6 +532,7 @@ module.exports = {
   deleteUser,
   protectedRoute,
   addPublication,
-  removePublication
+  removepubliaction,
+  getPublications
 
 }
