@@ -3,7 +3,7 @@ const Event = require("../model/event.model")
 
 const getEvents = async (req, res) => {
     try {
-        const events = await Event.find({})
+        const events = await Event.find({}).sort({_id: -1})
         if (!events) {
             return res.status(400).send({
                 success: false,

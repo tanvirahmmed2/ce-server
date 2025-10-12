@@ -4,7 +4,7 @@ const streamifier = require("streamifier");
 
 const getNotices = async (req, res) => {
     try {
-        const notices = await Notice.find({});
+        const notices = await Notice.find({}).sort({ _id: -1 })
         if (!notices || notices.length === 0) {
             return res.status(404).send({
                 success: false,
@@ -44,19 +44,13 @@ const addNotice = async (req, res) => {
                 message: "PDF file is required"
             });
         }
+        const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+        const uploadedPdf = await cloudinary.uploader.upload(fileStr, {
+            resource_type: "raw",
+            folder: "notice",
+        })
 
-        const uploadedPdf = await new Promise((resolve, reject) => {
-            const stream = cloudinary.uploader.upload_stream(
-                { folder: "notice", resource_type: "raw" }, 
-                (error, result) => {
-                    if (result) resolve(result);
-                    else reject(error);
-                }
-            );
-            streamifier.createReadStream(req.file.buffer).pipe(stream);
-        });
 
-        // Save notice to database
         const newNotice = new Notice({
             title,
             pdf: uploadedPdf.secure_url,
@@ -86,7 +80,7 @@ const removeNotice = async (req, res) => {
     try {
         const { id } = req.body;
 
-        // 1️⃣ Validate ID
+        
         if (!id) {
             return res.status(400).send({
                 success: false,
@@ -94,7 +88,7 @@ const removeNotice = async (req, res) => {
             });
         }
 
-        // 2️⃣ Check if notice exists
+      
         const notice = await Notice.findById(id);
         if (!notice) {
             return res.status(404).send({
@@ -103,20 +97,20 @@ const removeNotice = async (req, res) => {
             });
         }
 
-        // 3️⃣ Delete PDF from Cloudinary (only if it exists)
+       
         if (notice.pdf_id) {
             try {
-                await cloudinary.uploader.destroy(notice.pdf_id);
+                await cloudinary.uploader.destroy(notice.pdf_id, {resource_type: 'raw'});
             } catch (cloudError) {
                 console.log("Cloudinary delete failed:", cloudError.message);
-                // optional: continue even if pdf deletion fails
+               
             }
         }
 
-        // 4️⃣ Delete notice from MongoDB
+        
         await Notice.findByIdAndDelete(id);
 
-        // 5️⃣ Send response
+        
         return res.status(200).send({
             success: true,
             message: "Notice deleted successfully",

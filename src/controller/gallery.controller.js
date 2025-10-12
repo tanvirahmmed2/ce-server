@@ -6,7 +6,7 @@ const Gallery = require("../model/gallery.model")
 const getImages = async (req, res) => {
 
     try {
-        const images = await Gallery.find({})
+        const images = await Gallery.find({}).sort({ _id: -1 })
         if (!images) {
             return res.status(400).send({
                 success: false,
@@ -65,36 +65,44 @@ const addImage = async (req, res) => {
 }
 
 const removeImage = async (req, res) => {
-    try {
-        const { id } = req.body
-        if (!id) {
-            return res.status(400).send({
-                success: false,
-                message: 'Image id not found'
-            })
-        }
-        const image = await Gallery.findOne({ _id: id })
-        if (!image) {
-            return res.status(400).send({
-                success: false,
-                message: 'image not found'
-            })
-        }
-        await cloudinary.uploader.destroy(image.image_id)
-        await image.findOneAndDelete({ _id: id })
-        res.status(200).send({
-            success: true,
-            message: 'Successfully removed image'
-        })
-    } catch (error) {
-        res.status(500).send({
-            success: false,
-            message: 'Failed to remove image',
-            error: error
-        })
+  try {
+    const { id } = req.body;
+    if (!id) {
+      return res.status(400).send({
+        success: false,
+        message: 'Image id not found'
+      });
     }
 
-}
+    const image = await Gallery.findById(id);
+    if (!image) {
+      return res.status(404).send({
+        success: false,
+        message: 'Image not found'
+      });
+    }
+
+    await cloudinary.uploader.destroy(image.image_id, { resource_type: "image" }); 
+
+    await Gallery.findByIdAndDelete(id);
+
+    res.status(200).send({
+      success: true,
+      message: 'Successfully removed image'
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Failed to remove image',
+      error: error.message
+    });
+  }
+};
+
+
+
 module.exports = {
     getImages,
     addImage,

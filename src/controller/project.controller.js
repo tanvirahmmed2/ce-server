@@ -6,7 +6,7 @@ const Project = require("../model/project.model")
 const getProject = async (req, res) => {
 
     try {
-        const projects = await Project.find({})
+        const projects = await Project.find({}).sort({_id: -1})
         if (!projects) {
             return res.status(400).send({
                 success: false,

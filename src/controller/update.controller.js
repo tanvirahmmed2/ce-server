@@ -6,7 +6,7 @@ const Update = require("../model/update.model")
 const getUpdate = async (req, res) => {
 
     try {
-        const updates = await Update.find({})
+        const updates = await Update.find({}).sort({_id: -1})
         if (!updates) {
             return res.status(400).send({
                 success: false,

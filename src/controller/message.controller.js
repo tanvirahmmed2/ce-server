@@ -3,7 +3,7 @@ const Message = require("../model/message.model")
 
 const getMessages = async (req, res) => {
     try {
-        const messages = await Message.find({});
+        const messages = await Message.find({}).sort({_id: -1})
 
         if (!messages || messages.length === 0) {
             return res.status(404).send({
