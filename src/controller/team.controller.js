@@ -1,5 +1,6 @@
 const Team = require("../model/team.model")
 const cloudinary = require('../config/cloudinary')
+const User = require("../model/user.model")
 
 
 const getTeam = async (req, res) => {
@@ -28,8 +29,8 @@ const getTeam = async (req, res) => {
 
 const addTeam = async (req, res) => {
     try {
-        const { name, role, post, profileLink } = req.body
-        if (!name || !role || !post || !profileLink) {
+        const { name, role, post, email } = req.body
+        if (!name || !role || !post || !email) {
             return res.status(200).send({
                 success: false,
                 message: 'Fill all field'
@@ -41,22 +42,30 @@ const addTeam = async (req, res) => {
                 message: 'Profile image required'
             })
         }
+        const user= await User.findOne({email:email})
+        if(!user){
+            return res.status(400).send({
+                success: false,
+                message: 'Member profile not found. Please create a profile first'
+            })
+        }
+
         const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
         const uploadImage = await cloudinary.uploader.upload(fileStr, { folder: 'team' })
 
         const newTeam = new Team({
-            name, role, post, profileImage: uploadImage.secure_url, profileImage_id: uploadImage.public_id, profileLink
+            name, role, post, profileImage: uploadImage.secure_url, profileImage_id: uploadImage.public_id, userId: user._id
         })
         await newTeam.save()
         res.status(200).send({
             success: true,
-            message: 'Team profile uploaded'
+            message: 'Team member profile uploaded'
         })
 
     } catch (error) {
         res.status(500).send({
             succes: false,
-            message: "Failed to add team",
+            message: "Failed to add team member",
             error: error
         })
     }

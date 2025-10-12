@@ -16,7 +16,7 @@ const teamSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    profileLink: {
+    userId: {
         type: String,
         required: true,
     },
