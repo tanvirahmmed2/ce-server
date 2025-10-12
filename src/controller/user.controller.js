@@ -467,7 +467,7 @@ const removepubliaction = async (req, res) => {
 
 const getPublications = async (req, res) => {
   try {
-    const users = await User.find({}).select("-password");
+    const users = await User.find({}).select("-password").sort({_id:-1})
 
     if (!users || users.length === 0) {
       return res.status(400).send({
