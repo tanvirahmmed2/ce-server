@@ -5,7 +5,6 @@ const cookieParser = require('cookie-parser');
 const userRouter = require('./router/user.router')
 const messageRouter = require('./router/message.router')
 const eventRouter = require('./router/event.router')
-const libraryRouter = require('./router/library.router')
 const noticeRouter = require('./router/notice.router')
 const updateRouter = require('./router/update.router');
 const teamRouter = require('./router/team.router');
@@ -37,7 +36,6 @@ app.get('/api', (req,res)=>{
 app.use('/api/user', userRouter)
 app.use('/api/message', messageRouter)
 app.use('/api/event', eventRouter)
-app.use('/api/library', libraryRouter)
 app.use('/api/notice', noticeRouter)
 app.use('/api/update', updateRouter)
 app.use('/api/team', teamRouter)
