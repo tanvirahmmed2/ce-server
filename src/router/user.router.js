@@ -16,7 +16,7 @@ userRouter.post('/login', loginUser)
 userRouter.post('/logout',isLogin, logoutUser)
 userRouter.post('/forget', forgetPassword)
 userRouter.post('/reset', resetPassword)
-userRouter.delete('/delete',isLogin, deleteUser)
+userRouter.delete('/delete', deleteUser)
 
 userRouter.put('/updaterole',isLogin, isAdmin, updateRole)
 userRouter.put('/updateban', updateBan)
