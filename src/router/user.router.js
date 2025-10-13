@@ -28,7 +28,7 @@ userRouter.get('/protectedroute', isLogin, protectedRoute )
 // update
 
 userRouter.post('/addpublication',isLogin, isAuthor, addPublication)
-userRouter.delete('/removepublication',isLogin, isAuthor, removepubliaction)
+userRouter.delete('/removepublication', removepubliaction)
 
 userRouter.put('/updatename', updateName)
 userRouter.put('/updatedob', updateDob)
