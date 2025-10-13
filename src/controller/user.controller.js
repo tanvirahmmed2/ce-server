@@ -376,7 +376,7 @@ const addPublication = async (req, res) => {
   try {
     const { title, link, description, authorId } = req.body;
 
-    
+
     if (!title || !link || !description || !authorId) {
       return res.status(400).send({
         success: false,
@@ -399,10 +399,10 @@ const addPublication = async (req, res) => {
       });
     }
 
-  
+
     user.publications.push({ title, link, description, authorId });
 
-    
+
     await user.save();
 
     res.status(200).send({
@@ -440,7 +440,7 @@ const removepubliaction = async (req, res) => {
       });
     }
 
-   
+
     const updated = await User.findByIdAndUpdate(
       authorId,
       { $pull: { publications: { _id: pubId } } },
@@ -467,7 +467,7 @@ const removepubliaction = async (req, res) => {
 
 const getPublications = async (req, res) => {
   try {
-    const users = await User.find({}).select("-password").sort({_id:-1})
+    const users = await User.find({}).select("-password").sort({ _id: -1 })
 
     if (!users || users.length === 0) {
       return res.status(400).send({
@@ -519,6 +519,130 @@ const protectedRoute = async (req, res) => {
 };
 
 
+const updateName = async (req, res) => {
+  try {
+    const { userId, name } = req.body
+    if (!userId || !name) {
+      return res.status(400).send({
+        success: false,
+        message: 'Enough resourch not found'
+      })
+    }
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: 'User not found'
+      })
+    }
+    user.name = name
+    await user.save()
+    res.status(200).send({
+      success: true,
+      message: ' Successfully changed name'
+    })
+  } catch (error) {
+    res.status(500).send({
+      succcess: false,
+      message: 'Name Change failed',
+      error: error
+    })
+
+  }
+}
+
+
+const updateDob = async (req, res) => {
+  try {
+    const { userId, dateOfBirth } = req.body
+    if (!userId || !dateOfBirth) {
+      return res.status(400).send({
+        success: false,
+        message: 'Enough resourch not found'
+      })
+    }
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: 'User not found'
+      })
+    }
+    user.dateOfBirth = dateOfBirth
+    await user.save()
+    res.status(200).send({
+      success: true,
+      message: ' Successfully changed Date of Birth'
+    })
+  } catch (error) {
+    res.status(500).send({
+      succcess: false,
+      message: 'Date of birth Change failed',
+      error: error
+    })
+
+  }
+}
+
+
+const updateEmail = async (req, res) => {
+  try {
+    const { userId, email } = req.body;
+
+
+    if (!userId || !email) {
+      return res.status(400).send({
+        success: false,
+        message: 'User ID and new email are required',
+      });
+    }
+
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+
+    const existingEmail = await User.findOne({ email });
+    if (existingEmail && existingEmail._id.toString() !== userId) {
+      return res.status(400).send({
+        success: false,
+        message: 'This email is already linked to another account',
+      });
+    }
+
+
+    if (user.email === email) {
+      return res.status(400).send({
+        success: false,
+        message: 'You are already using this email',
+      });
+    }
+
+
+    user.email = email;
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: 'Email changed successfully',
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Failed to change email',
+      error: error.message,
+    });
+  }
+};
+
+
 
 module.exports = {
   resgisterUser,
@@ -533,6 +657,9 @@ module.exports = {
   protectedRoute,
   addPublication,
   removepubliaction,
-  getPublications
+  getPublications,
+  updateName,
+  updateDob,
+  updateEmail
 
 }
