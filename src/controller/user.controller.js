@@ -89,7 +89,7 @@ const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).send({ success: false, message: "User not found with this emai. Please signup" });
+      return res.status(404).send({ success: false, message: "User not found with this email. Please signup" });
     }
 
     const passwordMatch = await bcrypt.compare(password, user.password);
