@@ -44,8 +44,8 @@ const userSchema = new mongoose.Schema({
         trim: true,
         match: [/.+\@.+\..+/, 'Please enter a valid email address']
     },
-    isBanned:{
-        type:Boolean,
+    isBanned: {
+        type: Boolean,
         default: false
     },
     phone: {
@@ -63,7 +63,7 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ['user','author','admin'],
+        enum: ['user', 'author', 'admin'],
         default: 'user'
     },
     education: [
@@ -77,7 +77,8 @@ const userSchema = new mongoose.Schema({
         }
     ],
     publications: [
-        {   authorId: {type: String, trim: true},
+        {
+            authorId: { type: String, trim: true },
             title: { type: String, trim: true },
             link: { type: String, trim: true },
             description: { type: String, trim: true },
@@ -89,6 +90,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    work: [
+        {
+            postion: { type: String, trim: true },
+            company: { type: String, trim: true },
+            createdAt: { type: Date, default: Date.now }
+        }
+    ],
     passwordResetExpires: {
         type: Date,
         default: null
@@ -96,7 +104,7 @@ const userSchema = new mongoose.Schema({
     createdAt: {
         type: Date,
         default: Date.now
-    } 
+    }
 });
 
 const User = mongoose.model('User', userSchema);

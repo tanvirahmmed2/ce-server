@@ -1,5 +1,5 @@
 const express = require('express')
-const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser, addPublication,  removepubliaction, getPublications, updateName, updateDob, updateEmail, updatePassword,  } = require('../controller/user.controller')
+const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser, addPublication,  removepubliaction, getPublications, updateName, updateDob, updateEmail, updatePassword, addEducation, removeEducation, addWork, removeWork,  } = require('../controller/user.controller')
 const {   isLogin, isAdmin, isAuthor } = require('../middleware/authenticator')
 const userRouter = express.Router()
 
@@ -33,6 +33,10 @@ userRouter.put('/updatename', updateName)
 userRouter.put('/updatedob', updateDob)
 userRouter.put('/updateemail', updateEmail)
 userRouter.put('/updatepassword', updatePassword)
+userRouter.post('/addeducation', addEducation)
+userRouter.delete('/removeeducation', removeEducation)
+userRouter.post('/addwork', addWork)
+userRouter.delete('/removework', removeWork)
 
 userRouter.get('/publications', getPublications)
 

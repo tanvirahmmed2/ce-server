@@ -690,6 +690,148 @@ const updatePassword = async (req, res) => {
 }
 
 
+const addEducation = async (req, res) => {
+  try {
+    const { userId, degree, field, institution, startYear, endYear } = req.body
+    if (!userId || !degree || !field || !institution || !startYear || !endYear) {
+      return res.status(400).send({
+        success: false,
+        message: 'All field are required'
+      })
+    }
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: 'User not found'
+      })
+    }
+    user.education.push({ degree, field, institution, startYear, endYear })
+    await user.save()
+    res.status(200).send({
+      success: true,
+      message: 'Successfully added educational information'
+    })
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: 'Failed to add Information'
+    })
+
+  }
+}
+
+
+const removeEducation = async (req, res) => {
+  try {
+    const { userId, eduId } = req.body;
+
+    if (!userId || !eduId) {
+      return res.status(400).send({
+        success: false,
+        message: "User ID and edu ID are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { education: { _id: eduId } } },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Information deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to delete information",
+      error: error.message,
+    });
+  }
+};
+
+
+const addWork = async (req, res) => {
+  try {
+    const { userId, position, company } = req.body
+    if (!userId || !position || !company) {
+      return res.status(400).send({
+        success: false,
+        message: "All fields are required"
+      })
+    }
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: "user not found"
+      })
+    }
+    user.work.push({ position, company })
+    await user.save()
+    res.status(200).send({
+      succcess: true,
+      message: 'Successfully added work'
+    })
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: 'Failed to add work'
+    })
+
+  }
+}
+
+const removeWork = async (req, res) => {
+  try {
+    const { userId,workId } = req.body;
+
+    if (!userId || !workId) {
+      return res.status(400).send({
+        success: false,
+        message: "User ID and work ID are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { work: { _id: workId } } },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Work Information deleted successfully",
+    });
+
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: "Failed to delete work information",
+      error: error.message,
+    });
+  }
+};
+
 module.exports = {
   resgisterUser,
   loginUser,
@@ -707,6 +849,10 @@ module.exports = {
   updateName,
   updateDob,
   updateEmail,
-  updatePassword
+  updatePassword,
+  addEducation,
+  removeEducation,
+  addWork,
+  removeWork
 
 }
