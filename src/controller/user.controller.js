@@ -1,4 +1,5 @@
 require('dotenv').config()
+const cloudinary= require ('../config/cloudinary')
 const User = require("../model/user.model");
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
@@ -585,62 +586,6 @@ const updateDob = async (req, res) => {
 }
 
 
-const updateEmail = async (req, res) => {
-  try {
-    const { userId, email } = req.body;
-
-
-    if (!userId || !email) {
-      return res.status(400).send({
-        success: false,
-        message: 'User ID and new email are required',
-      });
-    }
-
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).send({
-        success: false,
-        message: 'User not found',
-      });
-    }
-
-
-    const existingEmail = await User.findOne({ email });
-    if (existingEmail && existingEmail._id.toString() !== userId) {
-      return res.status(400).send({
-        success: false,
-        message: 'This email is already linked to another account',
-      });
-    }
-
-
-    if (user.email === email) {
-      return res.status(400).send({
-        success: false,
-        message: 'You are already using this email',
-      });
-    }
-
-
-    user.email = email;
-    await user.save();
-
-    res.status(200).send({
-      success: true,
-      message: 'Email changed successfully',
-    });
-
-  } catch (error) {
-    console.error(error);
-    res.status(500).send({
-      success: false,
-      message: 'Failed to change email',
-      error: error.message,
-    });
-  }
-};
 
 
 const updatePassword = async (req, res) => {
@@ -650,6 +595,12 @@ const updatePassword = async (req, res) => {
       return res.status(400).send({
         success: false,
         message: 'Enough resourch not found'
+      })
+    }
+    if(old_password === new_password){
+      return res.status(400).send({
+        success: false,
+        message: 'New password cant be same as old password'
       })
     }
     const user = await User.findById(userId)
@@ -671,6 +622,8 @@ const updatePassword = async (req, res) => {
     const hashedPass = await bcrypt.hash(new_password, salt);
     user.password = hashedPass
     await user.save()
+
+    
     res.status(200).send({
       success: true,
       message: ' Password updated successfully'
@@ -693,7 +646,7 @@ const updatePassword = async (req, res) => {
 const addEducation = async (req, res) => {
   try {
     const { userId, degree, field, institution, startYear, endYear } = req.body
-    if (!userId || !degree || !field || !institution || !startYear || !endYear) {
+    if (!userId || !degree || !field || !institution || !startYear) {
       return res.status(400).send({
         success: false,
         message: 'All field are required'
@@ -795,7 +748,7 @@ const addWork = async (req, res) => {
 
 const removeWork = async (req, res) => {
   try {
-    const { userId,workId } = req.body;
+    const { userId, workId } = req.body;
 
     if (!userId || !workId) {
       return res.status(400).send({
@@ -832,6 +785,66 @@ const removeWork = async (req, res) => {
   }
 };
 
+
+const updateProfileImage = async (req, res) => {
+  try {
+    const { userId } = req.body;
+
+    if (!userId) {
+      return res.status(400).send({
+        success: false,
+        message: 'User ID not found',
+      });
+    }
+
+    if (!req.file) {
+      return res.status(400).send({
+        success: false,
+        message: 'Image not found',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: 'User not found',
+      });
+    }
+
+   
+    if (user.profileImage && user.profileImage.length > 0) {
+      await cloudinary.uploader.destroy(user.profileImage_id);
+      user.profileImage = '';
+      user.profileImage_id = '';
+    }
+
+   
+    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+    const uploadedImage = await cloudinary.uploader.upload(fileStr, { folder: 'user' });
+
+    user.profileImage = uploadedImage.secure_url;
+    user.profileImage_id = uploadedImage.public_id;
+
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: 'Successfully updated profile image',
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: 'Could not upload profile image',
+      error: error.message,
+    });
+  }
+};
+
+
+
+
+
 module.exports = {
   resgisterUser,
   loginUser,
@@ -848,11 +861,11 @@ module.exports = {
   getPublications,
   updateName,
   updateDob,
-  updateEmail,
   updatePassword,
   addEducation,
   removeEducation,
   addWork,
-  removeWork
+  removeWork,
+  updateProfileImage
 
 }
