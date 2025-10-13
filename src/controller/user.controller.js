@@ -643,6 +643,52 @@ const updateEmail = async (req, res) => {
 };
 
 
+const updatePassword = async (req, res) => {
+  try {
+    const { userId, old_password, new_password } = req.body
+    if (!userId || !old_password || !new_password) {
+      return res.status(400).send({
+        success: false,
+        message: 'Enough resourch not found'
+      })
+    }
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: 'User not found'
+      })
+    }
+    const passwordMatch = await bcrypt.compare(old_password, user.password);
+    if (!passwordMatch) {
+      return res.status(400).send({
+        success: false,
+        message: 'Old password didnot match. Please try again or reset password'
+      })
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPass = await bcrypt.hash(new_password, salt);
+    user.password = hashedPass
+    await user.save()
+    res.status(200).send({
+      success: true,
+      message: ' Password updated successfully'
+    })
+
+
+
+
+  } catch (error) {
+    res.status(500).send({
+      succcess: false,
+      message: 'Password couldnot change',
+      error: error
+    })
+
+  }
+}
+
 
 module.exports = {
   resgisterUser,
@@ -660,6 +706,7 @@ module.exports = {
   getPublications,
   updateName,
   updateDob,
-  updateEmail
+  updateEmail,
+  updatePassword
 
 }
