@@ -44,10 +44,12 @@ const addNotice = async (req, res) => {
             });
         }
         const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
+
+
         const uploadedPdf = await cloudinary.uploader.upload(fileStr, {
-            resource_type: "raw",
-            folder: "notice",
-        })
+            folder: 'notice',
+            resource_type: 'raw',
+        });
 
 
         const newNotice = new Notice({
@@ -79,7 +81,7 @@ const removeNotice = async (req, res) => {
     try {
         const { id } = req.body;
 
-        
+
         if (!id) {
             return res.status(400).send({
                 success: false,
@@ -87,7 +89,7 @@ const removeNotice = async (req, res) => {
             });
         }
 
-      
+
         const notice = await Notice.findById(id);
         if (!notice) {
             return res.status(404).send({
@@ -96,20 +98,20 @@ const removeNotice = async (req, res) => {
             });
         }
 
-       
+
         if (notice.pdf_id) {
             try {
-                await cloudinary.uploader.destroy(notice.pdf_id, {resource_type: 'raw'});
+                await cloudinary.uploader.destroy(notice.pdf_id, { resource_type: 'raw' });
             } catch (cloudError) {
                 console.log("Cloudinary delete failed:", cloudError.message);
-               
+
             }
         }
 
-        
+
         await Notice.findByIdAndDelete(id);
 
-        
+
         return res.status(200).send({
             success: true,
             message: "Notice deleted successfully",

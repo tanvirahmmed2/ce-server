@@ -27,8 +27,6 @@ app.use(cors({
 
 
 
-
-
 app.get('/api', (req,res)=>{
     res.status(200).send('CCIRL server is running')
 })
