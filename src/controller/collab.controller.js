@@ -53,7 +53,6 @@ const addCollab = async (req, res) => {
         res.status(200).send({
             success: true,
             message: 'Succesfully created Collaboration',
-            payload: newEvent
         })
     } catch (error) {
         res.status(500).send({
