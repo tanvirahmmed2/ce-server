@@ -44,7 +44,12 @@ const resgisterUser = async (req, res) => {
         message: 'User already exists with this email'
       });
     }
-
+    if(password.length <8){
+      return res.status(400).send({
+        success: false,
+        message: 'password length must be atleast 8 character'
+      });
+    }
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
