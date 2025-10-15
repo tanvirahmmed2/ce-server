@@ -79,6 +79,9 @@ const userSchema = new mongoose.Schema({
     publications: [
         {
             authorId: { type: String, trim: true },
+            authorName: { type: String, trim: true },
+            pdf: { type: String, trim: true },
+            pdf_id: { type: String, trim: true },
             title: { type: String, trim: true },
             link: { type: String, trim: true },
             description: { type: String, trim: true },

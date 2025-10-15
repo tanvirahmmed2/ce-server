@@ -27,7 +27,7 @@ userRouter.get('/protectedroute', isLogin, protectedRoute )
 
 // update
 
-userRouter.post('/addpublication',isLogin, isAuthor, addPublication)
+userRouter.post('/addpublication',isLogin, isAuthor,upload.single('pdf'), addPublication)
 userRouter.delete('/removepublication', removepubliaction)
 
 userRouter.put('/updatename', updateName)

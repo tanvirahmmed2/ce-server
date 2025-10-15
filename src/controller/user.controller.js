@@ -1,5 +1,5 @@
 require('dotenv').config()
-const cloudinary= require ('../config/cloudinary')
+const cloudinary = require('../config/cloudinary')
 const User = require("../model/user.model");
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
@@ -44,7 +44,7 @@ const resgisterUser = async (req, res) => {
         message: 'User already exists with this email'
       });
     }
-    if(password.length <8){
+    if (password.length < 8) {
       return res.status(400).send({
         success: false,
         message: 'password length must be atleast 8 character'
@@ -382,11 +382,10 @@ const addPublication = async (req, res) => {
   try {
     const { title, link, description, authorId } = req.body;
 
-
     if (!title || !link || !description || !authorId) {
       return res.status(400).send({
         success: false,
-        message: 'All fields are required'
+        message: "All fields are required",
       });
     }
 
@@ -394,37 +393,60 @@ const addPublication = async (req, res) => {
     if (!user) {
       return res.status(404).send({
         success: false,
-        message: 'Author not found'
+        message: "Author not found",
       });
     }
 
-    if (user.role !== 'author') {
+    if (user.role !== "author") {
       return res.status(400).send({
         success: false,
-        message: 'User is not an author'
+        message: "User is not an author",
       });
     }
 
+    if (!req.file) {
+      return res.status(400).send({
+        success: false,
+        message: "PDF file is required",
+      });
+    }
 
-    user.publications.push({ title, link, description, authorId });
+    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
 
+    const uploadedPdf = await cloudinary.uploader.upload(fileStr, {
+      folder: "publications",
+      resource_type: "raw",
+    });
 
+    const newPublication = {
+      title,
+      link,
+      description,
+      authorId,
+      userName: user.name,
+      pdf: uploadedPdf.secure_url,
+      pdf_id: uploadedPdf.public_id,
+    };
+
+    user.publications.push(newPublication);
     await user.save();
 
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
-      message: 'Successfully submitted publication'
+      message: "Successfully submitted publication",
+      publication: newPublication,
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send({
+    console.error("Add Publication Error:", error);
+    return res.status(500).send({
       success: false,
-      message: 'Failed to submit publication',
-      error: error.message
+      message: "Failed to submit publication",
+      error: error.message,
     });
   }
 };
+
 
 
 const removepubliaction = async (req, res) => {
@@ -446,28 +468,40 @@ const removepubliaction = async (req, res) => {
       });
     }
 
+    const publication = user.publications.id(pubId);
+    if (!publication) {
+      return res.status(404).send({
+        success: false,
+        message: "Publication not found",
+      });
+    }
 
-    const updated = await User.findByIdAndUpdate(
+    if (publication.pdf_id) {
+      await cloudinary.uploader.destroy(publication.pdf_id, { resource_type: "raw" });
+    }
+
+    // 5️⃣ Remove publication from user
+    await User.findByIdAndUpdate(
       authorId,
       { $pull: { publications: { _id: pubId } } },
       { new: true }
     );
 
-    res.status(200).send({
+    return res.status(200).send({
       success: true,
       message: "Publication deleted successfully",
-      publications: updated.publications,
     });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send({
+    console.error("Remove Publication Error:", error);
+    return res.status(500).send({
       success: false,
       message: "Failed to delete publication",
       error: error.message,
     });
   }
 };
+
 
 
 
@@ -602,7 +636,7 @@ const updatePassword = async (req, res) => {
         message: 'Enough resourch not found'
       })
     }
-    if(old_password === new_password){
+    if (old_password === new_password) {
       return res.status(400).send({
         success: false,
         message: 'New password cant be same as old password'
@@ -628,7 +662,7 @@ const updatePassword = async (req, res) => {
     user.password = hashedPass
     await user.save()
 
-    
+
     res.status(200).send({
       success: true,
       message: ' Password updated successfully'
@@ -817,14 +851,14 @@ const updateProfileImage = async (req, res) => {
       });
     }
 
-   
+
     if (user.profileImage && user.profileImage.length > 0) {
       await cloudinary.uploader.destroy(user.profileImage_id);
       user.profileImage = '';
       user.profileImage_id = '';
     }
 
-   
+
     const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const uploadedImage = await cloudinary.uploader.upload(fileStr, { folder: 'user' });
 
