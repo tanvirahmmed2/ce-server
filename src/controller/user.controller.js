@@ -135,9 +135,9 @@ const loginUser = async (req, res) => {
 const logoutUser = async (req, res) => {
   try {
     res.clearCookie("user_token", {
-      httpOnly: true,
-      secure: true,     // set true if using HTTPS
-      sameSite: "strict",
+       httpOnly: true,      // Prevents client-side JS from accessing the cookie
+      secure: true,         // Ensures cookie is sent only over HTTPS
+      sameSite: "none",
       path: "/",
     })
     return res.status(200).send({
