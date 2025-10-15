@@ -259,9 +259,9 @@ const forgetPassword = async (req, res) => {
 
    
     user.passwordResetToken = resetCode;
-    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; 
 
-    await user.save({ validateBeforeSave: false });
+    await user.save();
 
     const emailData = {
       email,
@@ -291,9 +291,6 @@ const forgetPassword = async (req, res) => {
     });
   }
 };
-
-module.exports = forgetPassword;
-
 
 
 
