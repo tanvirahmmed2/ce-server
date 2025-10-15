@@ -538,19 +538,19 @@ const getPublications = async (req, res) => {
 const protectedRoute = async (req, res) => {
   try {
     const token = req.cookies.user_token;
-    if (!token) return res.status(401).send({ success: false, message: 'Not logged in' });
+    if (!token) return res.status(401).send({ success: false, user: null, message: 'Not logged in' });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password'); // exclude password
+    const user = await User.findById(decoded.id).select('-password');
 
-    res.status(200).send({
-      success: true,
-      user,
-    });
+    if (!user) return res.status(401).send({ success: false, user: null, message: 'User not found' });
+
+    res.status(200).send({ success: true, user });
   } catch (error) {
-    res.status(500).send({ success: false, message: 'Server error', error: error.message });
+    res.status(500).send({ success: false, user: null, message: 'Server error', error: error.message });
   }
 };
+
 
 
 const updateName = async (req, res) => {
