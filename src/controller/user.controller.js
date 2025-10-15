@@ -310,6 +310,12 @@ const resetPassword = async (req, res) => {
         message: 'code expired. Please send code again'
       })
     }
+    if (newpassword.length < 8) {
+      return res.status(400).send({
+        success: false,
+        message: 'password length must be atleast 8 character'
+      })
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(newpassword, salt);
@@ -650,7 +656,12 @@ const updatePassword = async (req, res) => {
         message: 'Old password didnot match. Please try again or reset password'
       })
     }
-
+    if (new_password.length < 8) {
+      return res.status(400).send({
+        success: false,
+        message: 'password length must be atleast 8 character'
+      })
+    }
     const salt = await bcrypt.genSalt(10);
     const hashedPass = await bcrypt.hash(new_password, salt);
     user.password = hashedPass
@@ -750,8 +761,8 @@ const removeEducation = async (req, res) => {
 
 const addWork = async (req, res) => {
   try {
-    const { userId, position, company } = req.body
-    if (!userId || !position || !company) {
+    const { userId, position, company, startYear, endYear } = req.body
+    if (!userId || !position || !company || !startYear) {
       return res.status(400).send({
         success: false,
         message: "All fields are required"
@@ -764,7 +775,7 @@ const addWork = async (req, res) => {
         message: "user not found"
       })
     }
-    user.work.push({ position, company })
+    user.work.push({ position, company, startYear, endYear })
     await user.save()
     res.status(200).send({
       succcess: true,

@@ -97,6 +97,8 @@ const userSchema = new mongoose.Schema({
         {
             position: { type: String, trim: true, required: true },
             company: { type: String, trim: true, required: true },
+            startYear: { type: String, trim: true, required: true },
+            end: { type: String, trim: true,  },
             createdAt: { type: Date, default: Date.now }
         }
     ],
