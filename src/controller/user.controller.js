@@ -110,10 +110,10 @@ const loginUser = async (req, res) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "1d" });
 
     const cookieOptions = {
-      httpOnly: true,
-      secure: false,
-      sameSite: "lax",
-      maxAge: 1000 * 60 * 60 * 24, // 1 hour
+      httpOnly: true,      // Prevents client-side JS from accessing the cookie
+      secure: true,         // Ensures cookie is sent only over HTTPS
+      sameSite: "none",     // Required for cross-site cookies (like frontend ↔ backend on different domains)
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
     };
 
     res.cookie("user_token", token, cookieOptions);
@@ -121,12 +121,6 @@ const loginUser = async (req, res) => {
     res.status(200).send({
       success: true,
       message: "Login successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        role: user.role,
-        email: user.email,
-      },
     });
   } catch (error) {
     res.status(500).send({
