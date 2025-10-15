@@ -245,38 +245,54 @@ const updateBan = async (req, res) => {
 const forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
-    if (!email) return res.status(400).send({ success: false, message: 'Please enter email address' });
+
+    if (!email) {
+      return res.status(400).json({ success: false, message: 'Please enter your email address.' });
+    }
 
     const user = await User.findOne({ email });
-    if (!user) return res.status(400).send({ success: false, message: 'No user found with this email. Please sign up' });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'No user found with this email. Please sign up.' });
+    }
 
-    const forgetcode = Math.floor(100000 + Math.random() * 900000).toString(); // Save as string
-    const codeExpireDate = Date.now() + 10 * 60 * 1000; // 10 minutes
+    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-    user.passwordResetToken = forgetcode;
-    user.passwordResetExpires = codeExpireDate;
+   
+    user.passwordResetToken = resetCode;
+    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; // 10 minutes
 
-    await user.save();
+    await user.save({ validateBeforeSave: false });
 
-    const emaildata = {
+    const emailData = {
       email,
-      subject: 'Password reset code',
+      subject: ' Password Reset Code',
       html: `
-        <h2>Hello ${user.name}</h2>
-        <p>Please use this code for your account recovery:</p>
-        <h1>${forgetcode}</h1>
+        <div style="font-family: Arial, sans-serif; padding: 10px;">
+          <h2>Hello ${user.name || 'User'},</h2>
+          <p>Use the following code to reset your password. It expires in <b>10 minutes</b>.</p>
+          <h1 style="background: #f4f4f4; padding: 10px; border-radius: 5px; display: inline-block;">${resetCode}</h1>
+          <p>If you didn’t request this, please ignore this email.</p>
+          <br/>
+          <p>— CCIRL</p>
+        </div>
       `
     };
 
-    sendMail(emaildata);
+    await sendMail(emailData); 
 
-    res.status(200).send({ success: true, message: 'Please check your mail' });
+    return res.status(200).json({ success: true, message: 'Reset code sent successfully. Please check your email.' });
 
   } catch (error) {
-    console.error(error);
-    res.status(500).send({ success: false, message: 'Failed to reset password' });
+    console.error('Error in forgetPassword:', error);
+
+    return res.status(500).json({
+      success: false,
+      message: 'Something went wrong while processing your request.'
+    });
   }
 };
+
+module.exports = forgetPassword;
 
 
 
