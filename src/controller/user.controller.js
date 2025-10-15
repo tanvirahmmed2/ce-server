@@ -247,25 +247,36 @@ const forgetPassword = async (req, res) => {
     const { email } = req.body;
 
     if (!email) {
-      return res.status(400).json({ success: false, message: 'Please enter your email address.' });
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter your email address.',
+      });
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ success: false, message: 'No user found with this email. Please sign up.' });
+      return res.status(404).json({
+        success: false,
+        message: 'No user found with this email. Please sign up.',
+      });
     }
 
+    // Generate 6-digit reset code using Math.random
     const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-   
-    user.passwordResetToken = resetCode;
-    user.passwordResetExpires = Date.now() + 10 * 60 * 1000; 
-
-    await user.save();
+    // Update token and expiry safely without triggering full validation
+    await User.findByIdAndUpdate(
+      user._id,
+      {
+        passwordResetToken: resetCode,
+        passwordResetExpires: Date.now() + 10 * 60 * 1000, // 10 minutes
+      },
+      { runValidators: false } // skip other schema validations
+    );
 
     const emailData = {
       email,
-      subject: ' Password Reset Code',
+      subject: '🔐 Password Reset Code',
       html: `
         <div style="font-family: Arial, sans-serif; padding: 10px;">
           <h2>Hello ${user.name || 'User'},</h2>
@@ -275,19 +286,36 @@ const forgetPassword = async (req, res) => {
           <br/>
           <p>— CCIRL</p>
         </div>
-      `
+      `,
     };
 
-    await sendMail(emailData); 
+    // Send email with error handling
+    try {
+      await sendMail(emailData);
+      console.log(`✅ Password reset code sent to ${email}`);
+    } catch (mailError) {
+      console.error('❌ Email sending failed:', mailError.message);
+      return res.status(500).json({
+        success: false,
+        message: 'Failed to send reset email. Please try again later.',
+      });
+    }
 
-     res.status(200).json({ success: true, message: 'Reset code sent successfully. Please check your email.' });
-
+    res.status(200).json({
+      success: true,
+      message: 'Reset code sent successfully. Please check your email.',
+    });
   } catch (error) {
-    console.error('Error in forgetPassword:', error);
+    // Structured logging for Render
+    console.error('❌ forgetPassword error:', {
+      message: error.message,
+      stack: error.stack,
+      errors: error.errors ? JSON.stringify(error.errors) : undefined,
+    });
 
-     res.status(500).json({
+    res.status(500).json({
       success: false,
-      message: 'Something went wrong while processing your request.'
+      message: 'Something went wrong while processing your request.',
     });
   }
 };
