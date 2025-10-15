@@ -280,12 +280,12 @@ const forgetPassword = async (req, res) => {
 
     await sendMail(emailData); 
 
-    return res.status(200).json({ success: true, message: 'Reset code sent successfully. Please check your email.' });
+     res.status(200).json({ success: true, message: 'Reset code sent successfully. Please check your email.' });
 
   } catch (error) {
     console.error('Error in forgetPassword:', error);
 
-    return res.status(500).json({
+     res.status(500).json({
       success: false,
       message: 'Something went wrong while processing your request.'
     });
