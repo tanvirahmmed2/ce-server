@@ -95,8 +95,51 @@ const removeUpdate = async (req, res) => {
     }
 
 }
+
+
+
+const updateUpdate=async(req,res)=>{
+    try {
+        const {title, description, editId} =req.body
+        if(!editId || !title || !description){
+            return res.status(400).send({
+                success: false,
+                message: 'All field required'
+            })
+        }
+        const update= await Update.findById(editId)
+        if(!update){
+            return res.status(400).send({
+                success: false,
+                message: 'Update not found'
+            })
+        }
+        if(update.title === title && update.description=== description){
+            return res.status(400).send({
+                success: false,
+                message: 'Please change anything or abort'
+            })
+        }
+        update.title= title
+        update.description= description
+        await update.save()
+        res.status(200).send({
+            success: true,
+            message: 'Successfully updated update'
+        })
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: 'Failed to add update'
+        })
+        
+    }
+}
+
+
 module.exports = {
     getUpdate,
     addUpdate,
-    removeUpdate
+    removeUpdate,
+    updateUpdate
 }

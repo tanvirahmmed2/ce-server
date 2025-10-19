@@ -4,6 +4,7 @@ const User = require("../model/user.model");
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken');
 const { sendMail } = require('../config/transporter');
+const Team = require('../model/team.model');
 
 const getUsers = async (req, res) => {
   try {
@@ -438,7 +439,7 @@ const addPublication = async (req, res) => {
       });
     }
 
-    if (user.role !== "author") {
+    if (user.role !== "Author") {
       return res.status(400).send({
         success: false,
         message: "User is not an author",
@@ -452,21 +453,40 @@ const addPublication = async (req, res) => {
       });
     }
 
-    const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString("base64")}`;
+    const fileStr = `data:application/pdf;base64,${req.file.buffer.toString("base64")}`;
 
-    const uploadedPdf = await cloudinary.uploader.upload(fileStr, {
-      folder: "publications",
+    const publicIdWithExtension = req.file.originalname.replace(/[^a-zA-Z0-9.\-_]/g, "_");
+
+
+    const result = await cloudinary.uploader.upload(fileStr, {
       resource_type: "raw",
+      folder: "notice",
+      public_id: publicIdWithExtension,
+      unique_filename: false,
+      overwrite: true,
     });
+
+
+
+
+    const publicIdWithoutExtension = result.public_id.replace(/\.pdf$/i, '');
+
+
+    const pdfUrl = cloudinary.url(publicIdWithoutExtension, {
+      resource_type: "raw",
+      format: 'pdf',
+      secure: true
+    });
+
 
     const newPublication = {
       title,
       link,
       description,
       authorId,
-      userName: user.name,
-      pdf: uploadedPdf.secure_url,
-      pdf_id: uploadedPdf.public_id,
+      authorName: user.name,
+      pdf: pdfUrl,
+      pdf_id: result.public_id,
     };
 
     user.publications.push(newPublication);
@@ -543,6 +563,67 @@ const removepubliaction = async (req, res) => {
   }
 };
 
+const updatePublication = async (req, res) => {
+  try {
+    const { title, description, link, editId, userId } = req.body;
+
+    if (!editId || !title || !description || !link || !userId) {
+      return res.status(400).send({
+        success: false,
+        message: "All fields are required",
+      });
+    }
+
+    // Find user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    // Find the publication within user's publications
+    const publication = user.publications.id(editId);
+    if (!publication) {
+      return res.status(404).send({
+        success: false,
+        message: "Publication not found",
+      });
+    }
+
+    // Prevent unnecessary update
+    if (
+      publication.title === title &&
+      publication.description === description &&
+      publication.link === link
+    ) {
+      return res.status(400).send({
+        success: false,
+        message: "Please modify something or cancel",
+      });
+    }
+
+    // Update fields
+    publication.title = title;
+    publication.description = description;
+    publication.link = link;
+
+    // Save parent document
+    await user.save();
+
+    res.status(200).send({
+      success: true,
+      message: "Publication updated successfully",
+    });
+  } catch (error) {
+    console.error("Error updating publication:", error);
+    res.status(500).send({
+      success: false,
+      message: "Failed to update publication",
+    });
+  }
+};
 
 
 
@@ -664,7 +745,6 @@ const updateDob = async (req, res) => {
 
   }
 }
-
 
 
 
@@ -903,15 +983,18 @@ const updateProfileImage = async (req, res) => {
       user.profileImage = '';
       user.profileImage_id = '';
     }
-
+    const teammember = await Team.findOne({ userId: userId })
 
     const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const uploadedImage = await cloudinary.uploader.upload(fileStr, { folder: 'user' });
 
     user.profileImage = uploadedImage.secure_url;
     user.profileImage_id = uploadedImage.public_id;
+    teammember.profileImage = uploadedImage.secure_url
+
 
     await user.save();
+    await teammember.save()
 
     res.status(200).send({
       success: true,
@@ -927,6 +1010,75 @@ const updateProfileImage = async (req, res) => {
 };
 
 
+const addNetwork = async (req, res) => {
+  try {
+    const { link, title, userId } = req.body
+    if (!link || !title || !userId) {
+      return res.status(400).send({
+        success: false,
+        message: 'All fields are required'
+      })
+    }
+    const user = await User.findById(userId)
+    if (!user) {
+      return res.status(400).send({
+        success: false,
+        message: 'User not found'
+      })
+    }
+    user.network.push({ link, title })
+    await user.save()
+    res.status(200).send({
+      success: true,
+      message: 'Successfully added network'
+    })
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: 'Server Error'
+    })
+
+  }
+}
+
+
+const removeNetwork = async (req, res) => {
+  try {
+    const { userId, networkId } = req.body;
+
+    if (!userId || !eduId) {
+      return res.status(400).send({
+        success: false,
+        message: "User ID and network ID are required",
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).send({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $pull: { network: { _id: networkId } } },
+      { new: true }
+    );
+
+    res.status(200).send({
+      success: true,
+      message: "Network deleted successfully",
+    });
+  } catch (error) {
+    res.status(500).send({
+      success: false,
+      message: 'Server Error'
+    })
+  }
+
+}
 
 
 
@@ -943,6 +1095,7 @@ module.exports = {
   protectedRoute,
   addPublication,
   removepubliaction,
+  updatePublication,
   getPublications,
   updateName,
   updateDob,
@@ -951,6 +1104,8 @@ module.exports = {
   removeEducation,
   addWork,
   removeWork,
-  updateProfileImage
+  updateProfileImage,
+  addNetwork,
+  removeNetwork
 
 }

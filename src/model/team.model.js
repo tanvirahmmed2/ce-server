@@ -22,11 +22,6 @@ const teamSchema = new mongoose.Schema({
     },
     profileImage: {
         type: String,
-        required: true,
-    },
-    profileImage_id: {
-        type: String,
-        required: true,
     },
     createdAt: {
         type: Date,

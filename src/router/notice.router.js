@@ -1,7 +1,7 @@
 const express= require('express')
 const { getNotices, addNotice, removeNotice } = require('../controller/notice.controller')
-const upload = require('../config/multer')
 const { isLogin, isAdmin } = require('../middleware/authenticator')
+const upload = require('../config/multer')
 
 
 

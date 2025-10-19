@@ -46,7 +46,7 @@ const isAdmin = (req, res, next) => {
       });
     }
 
-    if (user.role !== 'admin') {
+    if (user.role !== 'Admin') {
       return res.status(403).json({
         success: false,
         message: "You're not an admin"
@@ -73,7 +73,7 @@ const isAuthor = (req, res, next) => {
       });
     }
 
-    if (user.role !== 'author') {
+    if (user.role !== 'Author') {
       return res.status(403).json({
         success: false,
         message: "You're not an author"

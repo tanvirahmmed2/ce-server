@@ -63,8 +63,8 @@ const userSchema = new mongoose.Schema({
 
     role: {
         type: String,
-        enum: ['user', 'author', 'admin'],
-        default: 'user'
+        enum: ['User', 'Author', 'Admin'],
+        default: 'User'
     },
     education: [
         {
@@ -93,6 +93,14 @@ const userSchema = new mongoose.Schema({
         type: String,
         default: null,
     },
+    passwordResetExpires: {
+        type: Date,
+        default: null
+    },
+    post: {
+        type: String,
+        default: null
+    },
     work: [
         {
             position: { type: String, trim: true, required: true },
@@ -102,10 +110,14 @@ const userSchema = new mongoose.Schema({
             createdAt: { type: Date, default: Date.now }
         }
     ],
-    passwordResetExpires: {
-        type: Date,
-        default: null
-    },
+    network:[
+        {
+            link:{ type: String, trim:true, required: true},
+            title:{ type: String, trim:true, required: true},
+            
+        }
+    ],
+    
     createdAt: {
         type: Date,
         default: Date.now

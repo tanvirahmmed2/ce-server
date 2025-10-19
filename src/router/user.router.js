@@ -1,5 +1,5 @@
 const express = require('express')
-const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser, addPublication,  removepubliaction, getPublications, updateName, updateDob,  updatePassword, addEducation, removeEducation, addWork, removeWork, updateProfileImage,  } = require('../controller/user.controller')
+const { resgisterUser, loginUser, logoutUser, getUsers, protectedRoute, updateRole, updateBan, forgetPassword, resetPassword, deleteUser, addPublication,  removepubliaction, getPublications, updateName, updateDob,  updatePassword, addEducation, removeEducation, addWork, removeWork, updateProfileImage, addNetwork, updatePublication,  } = require('../controller/user.controller')
 const {   isLogin, isAdmin, isAuthor } = require('../middleware/authenticator')
 const upload = require('../config/multer')
 const userRouter = express.Router()
@@ -29,6 +29,7 @@ userRouter.get('/protectedroute', isLogin, protectedRoute )
 
 userRouter.post('/addpublication',isLogin, isAuthor,upload.single('pdf'), addPublication)
 userRouter.delete('/removepublication', removepubliaction)
+userRouter.put('/updatepublication', updatePublication)
 
 userRouter.put('/updatename', updateName)
 userRouter.put('/updatedob', updateDob)
@@ -37,6 +38,7 @@ userRouter.post('/addeducation', addEducation)
 userRouter.delete('/removeeducation', removeEducation)
 userRouter.post('/addwork', addWork)
 userRouter.delete('/removework', removeWork)
+userRouter.post('/addnetwork', addNetwork)
 userRouter.put('/updateprofileimage', upload.single('file'), updateProfileImage)
 
 userRouter.get('/publications', getPublications)

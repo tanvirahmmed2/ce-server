@@ -29,33 +29,28 @@ const getTeam = async (req, res) => {
 
 const addTeam = async (req, res) => {
     try {
-        const { name, role, post, email } = req.body
-        if (!name || !role || !post || !email) {
-            return res.status(200).send({
-                success: false,
-                message: 'Fill all field'
-            })
-        }
-        if (!req.file) {
+        const { role, post, email } = req.body
+
+        if (!role || !post || !email) {
             return res.status(400).send({
                 success: false,
-                message: 'Profile image required'
-            })
+                message: 'Please fill all fields'
+            });
         }
-        const user= await User.findOne({email:email})
-        if(!user){
+
+        const user = await User.findOne({ email: email })
+        if (!user) {
             return res.status(400).send({
                 success: false,
                 message: 'Member profile not found. Please create a profile first'
             })
         }
 
-        const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
-        const uploadImage = await cloudinary.uploader.upload(fileStr, { folder: 'team' })
-
         const newTeam = new Team({
-            name, role, post, profileImage: uploadImage.secure_url, profileImage_id: uploadImage.public_id, userId: user._id
+            name: user.name, role, post, profileImage: user.profileImage, userId: user._id
         })
+        user.post = post
+        await user.save()
         await newTeam.save()
         res.status(200).send({
             success: true,
@@ -72,26 +67,28 @@ const addTeam = async (req, res) => {
 }
 
 
-const removeTeam=async(req,res)=>{
+const removeTeam = async (req, res) => {
     try {
-        const {id}= req.body
-        if(!id){
+        const { id } = req.body
+        if (!id) {
             return res.status(400).send({
                 success: false,
                 message: 'Team member id not available'
             })
         }
-        const member= await Team.findOne({_id:id})
-        if(!member){
+        const member = await Team.findOne({ _id: id })
+        if (!member) {
             return res.status(400).send({
                 success: false,
                 message: 'Team member not available'
             })
         }
-        await cloudinary.uploader.destroy(member.profileImage_id)
-        await Team.findOneAndDelete({_id: id})
+        const user = await User.findById(member.userId)
+        user.post = null
+        await user.save()
+        await Team.findOneAndDelete({ _id: id })
         res.status(200).send({
-            success:true,
+            success: true,
             message: 'Successfully removed member'
         })
 

@@ -97,11 +97,50 @@ const removeProject = async (req, res) => {
 }
 
 
+const updateProject=async(req,res)=>{
+    try {
+        const {title, description, editId} =req.body
+        if(!editId || !title || !description){
+            return res.status(400).send({
+                success: false,
+                message: 'All field required'
+            })
+        }
+        const project= await Project.findById(editId)
+        if(!project){
+            return res.status(400).send({
+                success: false,
+                message: 'Project not found'
+            })
+        }
+        if(project.title === title && project.description=== description){
+            return res.status(400).send({
+                success: false,
+                message: 'Please change anything or abort'
+            })
+        }
+        project.title= title
+        project.description= description
+        await project.save()
+        res.status(200).send({
+            success: true,
+            message: 'Successfully updated project'
+        })
+    } catch (error) {
+        res.status(500).send({
+            success: false,
+            message: 'Failed to add project'
+        })
+        
+    }
+}
+
 
 
 
 module.exports = {
     getProject,
     addProject,
-    removeProject
+    removeProject,
+    updateProject
 }
