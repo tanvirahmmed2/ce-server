@@ -39,7 +39,7 @@ userRouter.delete('/removeeducation', removeEducation)
 userRouter.post('/addwork', addWork)
 userRouter.delete('/removework', removeWork)
 userRouter.post('/addnetwork', addNetwork)
-userRouter.put('/updateprofileimage', upload.single('file'), updateProfileImage)
+userRouter.put('/updateprofileimage', upload.single('image'), updateProfileImage)
 
 userRouter.get('/publications', getPublications)
 

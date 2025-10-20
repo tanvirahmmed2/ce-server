@@ -977,30 +977,32 @@ const updateProfileImage = async (req, res) => {
       });
     }
 
-
     if (user.profileImage && user.profileImage.length > 0) {
       await cloudinary.uploader.destroy(user.profileImage_id);
       user.profileImage = '';
       user.profileImage_id = '';
     }
-    const teammember = await Team.findOne({ userId: userId })
+
+    const teammember = await Team.findOne({ userId });
 
     const fileStr = `data:${req.file.mimetype};base64,${req.file.buffer.toString('base64')}`;
     const uploadedImage = await cloudinary.uploader.upload(fileStr, { folder: 'user' });
 
     user.profileImage = uploadedImage.secure_url;
     user.profileImage_id = uploadedImage.public_id;
-    teammember.profileImage = uploadedImage.secure_url
-
-
     await user.save();
-    await teammember.save()
+
+    if (teammember) {
+      teammember.profileImage = uploadedImage.secure_url;
+      await teammember.save();
+    }
 
     res.status(200).send({
       success: true,
       message: 'Successfully updated profile image',
     });
   } catch (error) {
+    console.log('❌ Upload Error:', error);
     res.status(500).send({
       success: false,
       message: 'Could not upload profile image',
@@ -1008,6 +1010,7 @@ const updateProfileImage = async (req, res) => {
     });
   }
 };
+
 
 
 const addNetwork = async (req, res) => {
