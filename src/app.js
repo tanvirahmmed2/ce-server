@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.use(cors({
-    origin: 'https://ccirl.netlify.app',
+    origin: ['https://ccirl.netlify.app','http://localhost:3000'],
     credentials: true
 }))
 
